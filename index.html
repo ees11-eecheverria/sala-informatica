@@ -108,7 +108,7 @@ textarea{resize:vertical;min-height:76px}
     <span class="lbl">Contrasena</span>
     <input type="password" id="login-pass" placeholder="Ingresa tu contrasena">
     <div class="lerr" id="login-error"></div>
-    <button class="btn btnp" style="width:100%;margin-top:12px;padding:11px;font-size:15px;" id="btn-ingresar">Ingresar</button>
+    <button class="btn btnp" style="width:100%;margin-top:12px;padding:14px;font-size:16px;min-height:50px;touch-action:manipulation;" id="btn-ingresar">Ingresar</button>
     <p class="lnote">Solo para uso de docentes de la institucion</p>
   </div>
 </div>
@@ -225,6 +225,7 @@ function slotOcupado(fecha,h){
 
 // LOGIN
 document.getElementById('btn-ingresar').addEventListener('click', hacerLogin);
+document.getElementById('btn-ingresar').addEventListener('touchend', function(e){ e.preventDefault(); hacerLogin(); });
 document.getElementById('login-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') hacerLogin(); });
 
 function hacerLogin(){
