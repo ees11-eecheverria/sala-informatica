@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sala de Informatica - E.E.S N11</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#185FA5;--azul-claro:#E6F1FB;
+  --verde:#3B6D11;--verde-claro:#EAF3DE;
+  --rojo:#A32D2D;--rojo-claro:#FCEBEB;
+  --amarillo:#854F0B;--amarillo-claro:#FAEEDA;
+  --violeta:#534AB7;--violeta-claro:#EEEDFE;
+  --gris:#F1EFE8;--borde:#e0ddd5;
+  --texto:#1a1a1a;--texto-sec:#6b6b6b;
+  --bg:#f9f8f5;--card:#ffffff;
+  --r:10px;--rl:14px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--texto);min-height:100vh;font-size:15px;line-height:1.5}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.lcard{background:var(--card);border:1px solid var(--borde);border-radius:var(--rl);padding:2.5rem 2rem;width:100%;max-width:400px;text-align:center}
+.licon{width:60px;height:60px;background:var(--azul-claro);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:26px}
+.lcard h1{font-size:20px;font-weight:600;margin-bottom:4px}
+.lcard .sub{font-size:13px;color:var(--texto-sec);margin-bottom:1.5rem;line-height:1.6}
+.lbl{font-size:12px;font-weight:500;color:var(--texto-sec);text-align:left;display:block;margin:12px 0 4px}
+.lcard input{width:100%;padding:10px 12px;border:1px solid var(--borde);border-radius:var(--r);font-size:15px;font-family:inherit;background:var(--bg)}
+.lcard input:focus{outline:none;border-color:var(--azul);background:#fff}
+.lerr{color:var(--rojo);font-size:13px;margin:10px 0 4px;min-height:18px;text-align:left}
+.lnote{font-size:12px;color:var(--texto-sec);margin-top:10px}
+#app{display:none}
+header{background:var(--card);border-bottom:1px solid var(--borde);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:10}
+.htitle{font-size:15px;font-weight:600}
+.hsub{font-size:12px;color:var(--texto-sec)}
+.main{max-width:960px;margin:0 auto;padding:1.5rem 1rem}
+.tabs{display:flex;gap:8px;margin-bottom:1.5rem;border-bottom:1px solid var(--borde)}
+.tbtn{padding:8px 18px 12px;border:none;border-bottom:3px solid transparent;background:none;font-size:14px;font-family:inherit;color:var(--texto-sec);cursor:pointer;position:relative;top:1px;transition:all .15s}
+.tbtn.active{color:var(--azul);border-bottom-color:var(--azul);font-weight:500}
+.nbadge{background:var(--rojo);color:#fff;font-size:10px;border-radius:20px;padding:1px 6px;margin-left:5px;font-weight:600}
+.panel{display:none}.panel.active{display:block}
+.stitle{font-size:15px;font-weight:600;margin-bottom:1rem}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:1rem}
+.li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-sec)}
+.ld{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.swrap{overflow-x:auto}
+.sgrid{display:grid;grid-template-columns:100px repeat(5,minmax(90px,1fr));gap:4px;margin-bottom:1.5rem;min-width:600px}
+.sh{font-size:12px;font-weight:500;color:var(--texto-sec);text-align:center;padding:6px 4px}
+.st{font-size:11px;color:var(--texto-sec);display:flex;align-items:center;padding:2px 0;line-height:1.3}
+.ss{border-radius:5px;padding:5px 4px;font-size:11px;text-align:center;border:1px solid transparent;min-height:40px;display:flex;align-items:center;justify-content:center;line-height:1.4}
+.sa{background:var(--verde-claro);color:var(--verde);border-color:#C0DD97}
+.sr{background:var(--amarillo-claro);color:var(--amarillo);border-color:#FAC775;font-weight:500}
+.sp{background:var(--violeta-claro);color:var(--violeta);border-color:#CECBF6}
+.fcard{background:var(--card);border:1px solid var(--borde);border-radius:var(--rl);padding:1.5rem;margin-top:1rem}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+label{font-size:13px;font-weight:500;color:var(--texto-sec)}
+input[type=text],input[type=date],input[type=number],input[type=email],select,textarea{font-family:inherit;font-size:14px;border-radius:var(--r);border:1px solid var(--borde);padding:9px 11px;background:var(--bg);color:var(--texto);width:100%;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--azul);background:#fff}
+textarea{resize:vertical;min-height:76px}
+.factions{display:flex;justify-content:flex-end;margin-top:4px}
+.hgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.hc{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--borde);border-radius:var(--r);cursor:pointer;transition:all .15s;background:var(--bg);user-select:none}
+.hc:hover{border-color:var(--azul);background:var(--azul-claro)}
+.hc.sel{border-color:var(--azul);background:var(--azul-claro);color:var(--azul);font-weight:500}
+.hc.ocup{opacity:.45;cursor:not-allowed;background:var(--gris);pointer-events:none}
+.hc input[type=checkbox]{width:15px;height:15px;accent-color:var(--azul);flex-shrink:0;pointer-events:none}
+.hlabel{font-size:13px}
+.btn{padding:9px 20px;border-radius:var(--r);border:1px solid var(--borde);background:var(--bg);font-size:14px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
+.btn:hover{background:var(--gris)}
+.btnp{background:var(--azul);color:#fff;border-color:var(--azul)}
+.btnp:hover{background:#0C447C}
+.btns{background:var(--verde);color:#fff;border-color:var(--verde);font-size:13px;padding:6px 14px}
+.btnd{background:var(--rojo);color:#fff;border-color:var(--rojo);font-size:13px;padding:6px 14px}
+.btnlo{font-size:13px;color:var(--texto-sec);background:none;border:1px solid var(--borde);border-radius:var(--r);padding:5px 12px;cursor:pointer;font-family:inherit}
+.alert{padding:10px 14px;border-radius:var(--r);font-size:14px;margin-bottom:1rem}
+.ae{background:var(--rojo-claro);color:var(--rojo);border:1px solid #F7C1C1}
+.as{background:var(--verde-claro);color:var(--verde);border:1px solid #C0DD97}
+.rcard{background:var(--card);border:1px solid var(--borde);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:10px}
+.rcard.pendiente{border-left:4px solid var(--violeta)}
+.rcard.aprobada{border-left:4px solid var(--verde)}
+.rcard.rechazada{border-left:4px solid var(--rojo);opacity:.75}
+.rhead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.rtitle{font-size:15px;font-weight:600}
+.rmeta{font-size:12px;color:var(--texto-sec);margin-top:3px}
+.rmeta span{margin-right:10px}
+.badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+.bp{background:var(--violeta-claro);color:var(--violeta)}
+.ba{background:var(--verde-claro);color:var(--verde)}
+.br{background:var(--rojo-claro);color:var(--rojo)}
+.ract{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.rform{margin-top:10px;display:none}
+.rform.vis{display:block}
+.rform .rbtns{display:flex;gap:8px;margin-top:8px}
+.empty{padding:2.5rem;text-align:center;color:var(--texto-sec);font-size:14px;border:1px dashed var(--borde);border-radius:var(--rl)}
+@media(max-width:600px){.fgrid{grid-template-columns:1fr}.fg.full{grid-column:1}.hgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="lcard">
+    <div class="licon">&#128187;</div>
+    <h1>Sala de Informatica</h1>
+    <p class="sub">E.E.S N&deg;11 &mdash; Esteban Echeverria<br>Sistema de reservas</p>
+    <span class="lbl">Mail ABC (@abc.gob.ar)</span>
+    <input type="email" id="login-email" placeholder="usuario@abc.gob.ar">
+    <span class="lbl">Contrasena</span>
+    <input type="password" id="login-pass" placeholder="Ingresa tu contrasena">
+    <div class="lerr" id="login-error"></div>
+    <button class="btn btnp" style="width:100%;margin-top:12px;padding:11px;font-size:15px;" id="btn-ingresar">Ingresar</button>
+    <p class="lnote">Solo para uso de docentes de la institucion</p>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div>
+      <div class="htitle">&#128187; Sala de Informatica &mdash; E.E.S N&deg;11</div>
+      <div class="hsub" id="header-rol"></div>
+    </div>
+    <button class="btnlo" id="btn-logout">Cerrar sesion</button>
+  </header>
+  <div class="main">
+    <div class="tabs">
+      <button class="tbtn active" id="tab-profesores">Solicitar reserva</button>
+      <button class="tbtn" id="tab-admin" style="display:none">Panel de administracion <span class="nbadge" id="notif-count" style="display:none"></span></button>
+    </div>
+
+    <div class="panel active" id="panel-profesores">
+      <p class="stitle">Disponibilidad de la sala</p>
+      <div class="legend">
+        <div class="li"><div class="ld" style="background:#EAF3DE;border:1px solid #C0DD97"></div>Disponible</div>
+        <div class="li"><div class="ld" style="background:#FAEEDA;border:1px solid #FAC775"></div>Reservada</div>
+        <div class="li"><div class="ld" style="background:#EEEDFE;border:1px solid #CECBF6"></div>Pendiente</div>
+      </div>
+      <div class="swrap"><div class="sgrid" id="schedule-grid"><div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--texto-sec)">Cargando...</div></div></div>
+
+      <div class="fcard">
+        <p class="stitle" style="margin-bottom:1.25rem">Nueva solicitud de reserva</p>
+        <div id="form-alert"></div>
+        <div class="fgrid">
+          <div class="fg"><label>Nombre del docente</label><input type="text" id="f-nombre" placeholder="Ej: Maria Gonzalez"></div>
+          <div class="fg"><label>Materia / Area</label><input type="text" id="f-materia" placeholder="Ej: Informatica"></div>
+          <div class="fg"><label>Fecha solicitada</label><input type="date" id="f-fecha"></div>
+          <div class="fg"><label>Curso / Division</label>
+            <select id="f-curso">
+              <option value="">-- Seleccionar --</option>
+              <option>1&deg; 1</option><option>1&deg; 6</option>
+              <option>2&deg; 1</option><option>2&deg; 4</option>
+              <option>3&deg; 1</option><option>3&deg; 4</option>
+              <option>4&deg; 1</option><option>4&deg; 2</option>
+              <option>5&deg; 1</option><option>5&deg; 2</option>
+              <option>6&deg; 1</option><option>6&deg; 2</option>
+            </select>
+          </div>
+          <div class="fg"><label>Recursos</label>
+            <select id="f-recursos">
+              <option value="">-- Seleccionar --</option>
+              <option>TV / Video</option><option>Netbooks</option><option>Robotica</option>
+            </select>
+          </div>
+          <div class="fg full">
+            <label>Horarios solicitados <span style="font-weight:400;color:var(--texto-sec)">(podes elegir uno o mas)</span></label>
+            <div class="hgrid" id="hgrid"></div>
+          </div>
+          <div class="fg full"><label>Actividad</label><textarea id="f-motivo" placeholder="Describe brevemente que van a hacer los alumnos..."></textarea></div>
+          <div class="fg"><label>Cantidad de alumnos</label><input type="number" id="f-alumnos" placeholder="Ej: 28" min="1" max="40"></div>
+        </div>
+        <div class="factions"><button class="btn btnp" id="btn-enviar">Enviar solicitud</button></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-admin">
+      <p class="stitle">Gestion de reservas</p>
+      <div id="admin-alert"></div>
+      <div id="lista-reservas"><div style="padding:2rem;text-align:center;color:var(--texto-sec)">Cargando...</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+var CFG = {
+  fbUrl:      "https://sala-informatica-efdbd-default-rtdb.firebaseio.com",
+  ejKey:      "EXwDJvwmZinEgTpDe",
+  ejService:  "service_v06ys7a",
+  ejTemplate: "template_tnqxuk1",
+  emailAdmin: "informatica11ee@gmail.com",
+  passDoc:    "laboratorio2026",
+  passAdmin:  "malvinas850"
+};
+
+var HORARIOS = ['7:30 - 8:30','8:30 - 9:30','9:45 - 10:45','10:45 - 11:45'];
+var DIAS     = ['Lunes','Martes','Miercoles','Jueves','Viernes'];
+
+firebase.initializeApp({ databaseURL: CFG.fbUrl });
+var db = firebase.database();
+emailjs.init(CFG.ejKey);
+
+var rol = null, emailUsr = null, datos = {};
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function toDS(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function fmtF(f){ if(!f) return '-'; var s=f.split('-'); return s[2]+'/'+s[1]+'/'+s[0]; }
+function minDate(){
+  var d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+2);
+  while(d.getDay()===0||d.getDay()===6) d.setDate(d.getDate()+1);
+  return d;
+}
+function alert2(id,msg,tipo){
+  var el=document.getElementById(id);
+  el.innerHTML=msg?'<div class="alert a'+tipo+'">'+msg+'</div>':'';
+}
+function slotOcupado(fecha,h){
+  var vals=Object.values(datos);
+  for(var i=0;i<vals.length;i++){
+    var r=vals[i];
+    if(r.fecha===fecha && r.horarios && r.horarios.indexOf(h)!==-1 && r.estado!=='rechazada') return true;
+  }
+  return false;
+}
+
+// LOGIN
+document.getElementById('btn-ingresar').addEventListener('click', hacerLogin);
+document.getElementById('login-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') hacerLogin(); });
+
+function hacerLogin(){
+  var email = document.getElementById('login-email').value.trim().toLowerCase();
+  var pass  = document.getElementById('login-pass').value;
+  var err   = document.getElementById('login-error');
+  err.textContent = '';
+
+  if (pass === CFG.passAdmin) {
+    emailUsr = email;
+    iniciar('admin');
+  } else if (pass === CFG.passDoc) {
+    if (!email.endsWith('@abc.gob.ar')) {
+      err.textContent = 'Los docentes deben usar su cuenta @abc.gob.ar';
+      return;
+    }
+    emailUsr = email;
+    iniciar('docente');
+  } else {
+    err.textContent = 'Contrasena incorrecta. Intenta de nuevo.';
+    document.getElementById('login-pass').value = '';
+  }
+}
+
+function iniciar(r){
+  rol = r;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('header-rol').textContent = (r==='admin'?'Administracion - ':'')+emailUsr;
+  if (r==='admin') document.getElementById('tab-admin').style.display = 'inline-block';
+  document.getElementById('f-fecha').min = toDS(minDate());
+  buildHorarios();
+
+  db.ref('reservas').on('value', function(snap){
+    datos = snap.val() || {};
+    buildGrid();
+    buildHorarios();
+    updateNotif();
+    if (rol==='admin' && document.getElementById('panel-admin').classList.contains('active')) renderAdmin();
+  });
+}
+
+document.getElementById('btn-logout').addEventListener('click', function(){
+  rol=null; emailUsr=null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-pass').value='';
+  document.getElementById('login-email').value='';
+  document.getElementById('login-error').textContent='';
+  document.getElementById('tab-admin').style.display='none';
+  switchTab('profesores');
+});
+
+// TABS
+document.getElementById('tab-profesores').addEventListener('click', function(){ switchTab('profesores'); });
+document.getElementById('tab-admin').addEventListener('click', function(){ switchTab('admin'); });
+function switchTab(t){
+  document.querySelectorAll('.tbtn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('panel-'+t).classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if (t==='admin') renderAdmin();
+}
+
+// GRILLA
+function buildGrid(){
+  var grid = document.getElementById('schedule-grid');
+  var hoy = new Date(); hoy.setHours(12,0,0,0);
+  var days=[]; var d=new Date(hoy);
+  while(days.length<5){ d.setDate(d.getDate()+1); if(d.getDay()>=1&&d.getDay()<=5) days.push(new Date(d)); }
+  var h='<div class="sh"></div>';
+  days.forEach(function(d){
+    h+='<div class="sh">'+DIAS[d.getDay()-1]+'<br><span style="font-weight:400;font-size:11px">'+d.getDate()+'/'+(d.getMonth()+1)+'</span></div>';
+  });
+  HORARIOS.forEach(function(hr){
+    h+='<div class="st">'+hr+'</div>';
+    days.forEach(function(d){
+      var ds=toDS(d), cls='sa', txt='Libre', r=null;
+      var vals=Object.values(datos);
+      for(var i=0;i<vals.length;i++){
+        if(vals[i].fecha===ds && vals[i].horarios && vals[i].horarios.indexOf(hr)!==-1 && vals[i].estado!=='rechazada'){ r=vals[i]; break; }
+      }
+      if(r){
+        if(r.estado==='pendiente'){ cls='sp'; txt='Pendiente'; }
+        else if(r.estado==='aprobada'){ cls='sr'; txt=r.curso+'<br><span style="font-weight:400;font-size:10px">'+r.materia+'</span>'; }
+      }
+      h+='<div class="ss '+cls+'">'+txt+'</div>';
+    });
+  });
+  grid.innerHTML=h;
+}
+
+// CHECKBOXES HORARIOS
+function buildHorarios(){
+  var fecha = document.getElementById('f-fecha').value;
+  var cont  = document.getElementById('hgrid');
+  var prevSel = [];
+  cont.querySelectorAll('input:checked').forEach(function(cb){ prevSel.push(cb.value); });
+  var h = '';
+  HORARIOS.forEach(function(hr){
+    var ocup = fecha ? slotOcupado(fecha, hr) : false;
+    var sel  = prevSel.indexOf(hr)!==-1 && !ocup;
+    var cls  = 'hc'+(ocup?' ocup':'')+(sel?' sel':'');
+    h += '<label class="'+cls+'" onclick="toggleH(this)">';
+    h += '<input type="checkbox" value="'+hr+'"'+(sel?' checked':'')+(ocup?' disabled':'')+'>';
+    h += '<span class="hlabel">'+hr+(ocup?' (ocupado)':'')+'</span></label>';
+  });
+  cont.innerHTML = h;
+}
+
+document.getElementById('f-fecha').addEventListener('change', buildHorarios);
+
+function toggleH(lbl){
+  if(lbl.classList.contains('ocup')) return;
+  var cb = lbl.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  lbl.classList.toggle('sel', cb.checked);
+}
+
+// ENVIAR SOLICITUD
+document.getElementById('btn-enviar').addEventListener('click', function(){
+  var nombre   = document.getElementById('f-nombre').value.trim();
+  var materia  = document.getElementById('f-materia').value.trim();
+  var fecha    = document.getElementById('f-fecha').value;
+  var curso    = document.getElementById('f-curso').value;
+  var recursos = document.getElementById('f-recursos').value;
+  var motivo   = document.getElementById('f-motivo').value.trim();
+  var alumnos  = document.getElementById('f-alumnos').value;
+  var hSel = [];
+  document.querySelectorAll('#hgrid input:checked').forEach(function(cb){ hSel.push(cb.value); });
+
+  if(!nombre||!materia||!fecha||!curso||!recursos||!motivo||!alumnos){
+    alert2('form-alert','Por favor completa todos los campos.','e'); return;
+  }
+  if(hSel.length===0){
+    alert2('form-alert','Selecciona al menos un horario.','e'); return;
+  }
+  var hoy=new Date(); hoy.setHours(0,0,0,0);
+  var diff=Math.floor((new Date(fecha+'T12:00:00')-hoy)/86400000);
+  if(diff<2){
+    var md=minDate(); var ml=pad(md.getDate())+'/'+pad(md.getMonth()+1)+'/'+md.getFullYear();
+    alert2('form-alert','Reservas con al menos 2 dias de anticipacion. Fecha minima: '+ml,'e'); return;
+  }
+  for(var i=0;i<hSel.length;i++){
+    if(slotOcupado(fecha,hSel[i])){
+      alert2('form-alert','El horario '+hSel[i]+' ya esta ocupado. Deseleccionalo.','e'); return;
+    }
+  }
+
+  var nueva = {
+    nombre:nombre, materia:materia, curso:curso, recursos:recursos, fecha:fecha,
+    horarios:hSel, horariosStr:hSel.join(' / '),
+    motivo:motivo, alumnos:parseInt(alumnos),
+    emailDocente:emailUsr, estado:'pendiente',
+    solicitadoEn:new Date().toISOString()
+  };
+
+  db.ref('reservas').push(nueva).then(function(){
+    alert2('form-alert','Solicitud enviada. Recibiras confirmacion en tu mail.','s');
+    enviarEmail(CFG.emailAdmin,'Administradora',nueva,null,null);
+    document.getElementById('f-nombre').value='';
+    document.getElementById('f-materia').value='';
+    document.getElementById('f-motivo').value='';
+    document.getElementById('f-alumnos').value='';
+    document.getElementById('f-fecha').value='';
+    document.getElementById('f-curso').selectedIndex=0;
+    document.getElementById('f-recursos').selectedIndex=0;
+    buildHorarios();
+  }).catch(function(){ alert2('form-alert','Error al guardar. Verifica tu conexion.','e'); });
+});
+
+// EMAILJS
+function enviarEmail(toEmail,toName,r,estado,motivo){
+  var msg;
+  if(!estado) msg='Nueva solicitud de '+r.nombre+' para el '+fmtF(r.fecha)+' - '+r.horariosStr+'. Ingresa al sistema para gestionar.';
+  else if(estado==='aprobada') msg='Tu reserva fue APROBADA para el '+fmtF(r.fecha)+' - '+r.horariosStr+'.';
+  else if(estado==='cancelada') msg='Tu reserva del '+fmtF(r.fecha)+' ('+r.horariosStr+') fue CANCELADA.'+(motivo?' Motivo: '+motivo:'');
+  else msg='Tu reserva fue RECHAZADA.'+(motivo?' Motivo: '+motivo:'');
+
+  var subj = !estado ? 'Nueva solicitud - '+r.nombre :
+             estado==='aprobada' ? 'Reserva APROBADA - Sala Informatica' :
+             estado==='cancelada' ? 'Reserva CANCELADA - Sala Informatica' :
+             'Reserva RECHAZADA - Sala Informatica';
+
+  emailjs.send(CFG.ejService, CFG.ejTemplate, {
+    to_email:toEmail, to_name:toName, subject:subj,
+    docente:r.nombre, email_doc:r.emailDocente||'-',
+    materia:r.materia, curso:r.curso,
+    fecha:fmtF(r.fecha), horarios:r.horariosStr,
+    recursos:r.recursos, alumnos:r.alumnos,
+    actividad:r.motivo, mensaje:msg
+  }).catch(function(e){ console.warn('EmailJS:',e); });
+}
+
+// NOTIF
+function updateNotif(){
+  var n=Object.values(datos).filter(function(r){ return r.estado==='pendiente'; }).length;
+  var nb=document.getElementById('notif-count');
+  nb.textContent=n; nb.style.display=n>0?'inline':'none';
+}
+
+// ADMIN
+function renderAdmin(){
+  var todas=Object.entries(datos).map(function(e){ return Object.assign({},e[1],{_k:e[0]}); });
+  var pend=todas.filter(function(r){ return r.estado==='pendiente'; }).sort(function(a,b){ return a.solicitadoEn.localeCompare(b.solicitadoEn); });
+  var hist=todas.filter(function(r){ return r.estado!=='pendiente'; }).sort(function(a,b){ return b.solicitadoEn.localeCompare(a.solicitadoEn); });
+  var h='';
+  if(pend.length){ h+='<p style="font-size:13px;color:var(--texto-sec);margin-bottom:8px">Pendientes ('+pend.length+')</p>'; pend.forEach(function(r){ h+=cardH(r); }); }
+  if(hist.length){ h+='<p style="font-size:13px;color:var(--texto-sec);margin:1.25rem 0 8px">Historial</p>'; hist.forEach(function(r){ h+=cardH(r); }); }
+  document.getElementById('lista-reservas').innerHTML = h||'<div class="empty">No hay reservas aun.</div>';
+}
+
+function cardH(r){
+  var k=r._k;
+  var f=fmtF(r.fecha);
+  var hs=r.horariosStr||(r.horarios?r.horarios.join(' / '):'-');
+  var bcls={pendiente:'bp',aprobada:'ba',rechazada:'br'}[r.estado];
+  var blbl={pendiente:'Pendiente',aprobada:'Aprobada',rechazada:'Rechazada'}[r.estado];
+  var acc='';
+
+  if(r.estado==='pendiente'){
+    acc='<div class="ract">'
+      +'<button class="btn btns" onclick="aprobar(\''+k+'\')">Aprobar</button>'
+      +'<button class="btn btnd" onclick="showForm(\''+k+'\')">Rechazar</button>'
+      +'</div>'
+      +'<div class="rform" id="rf-'+k+'">'
+      +'<textarea id="mt-'+k+'" style="font-size:13px;margin-top:8px" placeholder="Motivo del rechazo (el docente lo recibira por mail)..."></textarea>'
+      +'<div class="rbtns">'
+      +'<button class="btn btnd" onclick="rechazar(\''+k+'\')">Confirmar rechazo</button>'
+      +'<button class="btn" onclick="hideForm(\''+k+'\')">Cancelar</button>'
+      +'</div></div>';
+  } else if(r.estado==='aprobada'){
+    acc='<div class="ract">'
+      +'<button class="btn btnd" onclick="showForm(\''+k+'\')">Cancelar reserva aprobada</button>'
+      +'</div>'
+      +'<div class="rform" id="rf-'+k+'">'
+      +'<textarea id="mt-'+k+'" style="font-size:13px;margin-top:8px" placeholder="Motivo de la cancelacion (el docente lo recibira por mail)..."></textarea>'
+      +'<div class="rbtns">'
+      +'<button class="btn btnd" onclick="cancelar(\''+k+'\')">Confirmar cancelacion</button>'
+      +'<button class="btn" onclick="hideForm(\''+k+'\')">Volver</button>'
+      +'</div></div>';
+  } else {
+    acc = r.motivoRechazo ? '<p style="font-size:12px;color:var(--texto-sec);margin-top:6px">Motivo: '+r.motivoRechazo+'</p>' : '';
+  }
+
+  return '<div class="rcard '+r.estado+'">'
+    +'<div class="rhead"><div>'
+    +'<p class="rtitle">'+r.nombre+' &mdash; '+r.materia+'</p>'
+    +'<div class="rmeta"><span>&#128197; '+f+'</span><span>&#128336; '+hs+'</span><span>&#128101; '+r.alumnos+' alumnos</span></div>'
+    +'<div class="rmeta"><span>&#128218; '+r.curso+'</span><span>&#128187; '+r.recursos+'</span><span>&#9993; '+(r.emailDocente||'-')+'</span></div>'
+    +'<p style="font-size:13px;margin-top:5px">'+r.motivo+'</p>'
+    +'</div><span class="badge '+bcls+'">'+blbl+'</span></div>'
+    +acc+'</div>';
+}
+
+function showForm(k){ document.getElementById('rf-'+k).classList.add('vis'); }
+function hideForm(k){ document.getElementById('rf-'+k).classList.remove('vis'); }
+
+function aprobar(k){
+  var r=Object.assign({},datos[k],{_k:k});
+  db.ref('reservas/'+k).update({estado:'aprobada'}).then(function(){
+    alert2('admin-alert','Reserva aprobada. El docente fue notificado por mail.','s');
+    enviarEmail(r.emailDocente,r.nombre,r,'aprobada',null);
+    setTimeout(function(){ alert2('admin-alert','',''); },3500);
+  });
+}
+
+function rechazar(k){
+  var r=Object.assign({},datos[k],{_k:k});
+  var motivo=document.getElementById('mt-'+k).value.trim()||null;
+  db.ref('reservas/'+k).update({estado:'rechazada',motivoRechazo:motivo}).then(function(){
+    alert2('admin-alert','Reserva rechazada. El docente fue notificado por mail.','e');
+    enviarEmail(r.emailDocente,r.nombre,r,'rechazada',motivo);
+    setTimeout(function(){ alert2('admin-alert','',''); },3500);
+  });
+}
+
+function cancelar(k){
+  var r=Object.assign({},datos[k],{_k:k});
+  var motivo=document.getElementById('mt-'+k).value.trim()||null;
+  db.ref('reservas/'+k).update({estado:'rechazada',motivoRechazo:motivo}).then(function(){
+    alert2('admin-alert','Reserva cancelada. El docente fue notificado por mail.','e');
+    enviarEmail(r.emailDocente,r.nombre,r,'cancelada',motivo);
+    setTimeout(function(){ alert2('admin-alert','',''); },3500);
+  });
+}
+</script>
+</body>
+</html>
