@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sala de Informática — E.E.S N°11</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --azul: #185FA5; --azul-claro: #E6F1FB;
+    --verde: #3B6D11; --verde-claro: #EAF3DE;
+    --rojo: #A32D2D; --rojo-claro: #FCEBEB;
+    --amarillo: #854F0B; --amarillo-claro: #FAEEDA;
+    --violeta: #534AB7; --violeta-claro: #EEEDFE;
+    --gris-claro: #F1EFE8;
+    --borde: #e0ddd5; --texto: #1a1a1a; --texto-sec: #6b6b6b;
+    --bg: #f9f8f5; --bg-card: #ffffff;
+    --radio: 10px; --radio-lg: 14px;
+  }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--texto); min-height: 100vh; font-size: 15px; line-height: 1.5; }
+
+  /* LOGIN */
+  #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .login-card { background: var(--bg-card); border: 1px solid var(--borde); border-radius: var(--radio-lg); padding: 2.5rem 2rem; width: 100%; max-width: 400px; text-align: center; }
+  .login-icon { width: 60px; height: 60px; background: var(--azul-claro); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 26px; }
+  .login-card h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .login-card .sub { font-size: 13px; color: var(--texto-sec); margin-bottom: 1.5rem; line-height: 1.6; }
+  .login-field-label { font-size: 12px; font-weight: 500; color: var(--texto-sec); text-align: left; display: block; margin-bottom: 4px; margin-top: 12px; }
+  .login-card input { width: 100%; padding: 10px 12px; border: 1px solid var(--borde); border-radius: var(--radio); font-size: 15px; font-family: inherit; background: var(--bg); transition: border-color 0.15s; }
+  .login-card input:focus { outline: none; border-color: var(--azul); background: #fff; }
+  .login-error { color: var(--rojo); font-size: 13px; margin: 10px 0 4px; min-height: 18px; text-align: left; }
+  .login-note { font-size: 12px; color: var(--texto-sec); margin-top: 10px; }
+
+  /* APP */
+  #app { display: none; }
+  header { background: var(--bg-card); border-bottom: 1px solid var(--borde); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 58px; position: sticky; top: 0; z-index: 10; }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .header-title { font-size: 15px; font-weight: 600; }
+  .header-sub { font-size: 12px; color: var(--texto-sec); }
+  .btn-logout { font-size: 13px; color: var(--texto-sec); background: none; border: 1px solid var(--borde); border-radius: var(--radio); padding: 5px 12px; cursor: pointer; font-family: inherit; }
+  .btn-logout:hover { background: var(--gris-claro); }
+  .main { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; border-bottom: 1px solid var(--borde); }
+  .tab-btn { padding: 8px 18px 12px; border: none; border-bottom: 3px solid transparent; background: none; font-size: 14px; font-family: inherit; color: var(--texto-sec); cursor: pointer; transition: all 0.15s; position: relative; top: 1px; }
+  .tab-btn.active { color: var(--azul); border-bottom-color: var(--azul); font-weight: 500; }
+  .notif-badge { background: var(--rojo); color: #fff; font-size: 10px; border-radius: 20px; padding: 1px 6px; margin-left: 5px; font-weight: 600; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* GRILLA */
+  .section-title { font-size: 15px; font-weight: 600; margin-bottom: 1rem; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--texto-sec); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .schedule-wrap { overflow-x: auto; }
+  .schedule-grid { display: grid; grid-template-columns: 100px repeat(5, minmax(90px, 1fr)); gap: 4px; margin-bottom: 1.5rem; min-width: 600px; }
+  .sch-header { font-size: 12px; font-weight: 500; color: var(--texto-sec); text-align: center; padding: 6px 4px; }
+  .sch-time { font-size: 11px; color: var(--texto-sec); display: flex; align-items: center; padding: 2px 0; line-height: 1.3; }
+  .sch-slot { border-radius: 5px; padding: 5px 4px; font-size: 11px; text-align: center; border: 1px solid transparent; min-height: 40px; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
+  .slot-available { background: var(--verde-claro); color: var(--verde); border-color: #C0DD97; }
+  .slot-reserved  { background: var(--amarillo-claro); color: var(--amarillo); border-color: #FAC775; font-weight: 500; }
+  .slot-pending   { background: var(--violeta-claro); color: var(--violeta); border-color: #CECBF6; }
+  .slot-blocked   { background: var(--gris-claro); color: var(--texto-sec); border-color: #D3D1C7; }
+
+  /* FORM */
+  .form-card { background: var(--bg-card); border: 1px solid var(--borde); border-radius: var(--radio-lg); padding: 1.5rem; margin-top: 1rem; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 13px; font-weight: 500; color: var(--texto-sec); }
+  input[type=text], input[type=date], input[type=number], input[type=email], select, textarea { font-family: inherit; font-size: 14px; border-radius: var(--radio); border: 1px solid var(--borde); padding: 9px 11px; background: var(--bg); color: var(--texto); width: 100%; transition: border-color 0.15s; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--azul); background: #fff; }
+  textarea { resize: vertical; min-height: 76px; }
+  .form-actions { display: flex; justify-content: flex-end; margin-top: 4px; }
+
+  /* CHECKBOXES HORARIOS */
+  .horarios-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .horario-check { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid var(--borde); border-radius: var(--radio); cursor: pointer; transition: all 0.15s; background: var(--bg); user-select: none; }
+  .horario-check:hover:not(.ocupado) { border-color: var(--azul); background: var(--azul-claro); }
+  .horario-check.selected { border-color: var(--azul); background: var(--azul-claro); color: var(--azul); font-weight: 500; }
+  .horario-check.ocupado { opacity: 0.45; cursor: not-allowed; background: var(--gris-claro); }
+  .horario-check input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--azul); cursor: pointer; flex-shrink: 0; pointer-events: none; }
+  .horario-label { font-size: 13px; }
+
+  /* BOTONES */
+  .btn { padding: 9px 20px; border-radius: var(--radio); border: 1px solid var(--borde); background: var(--bg); font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.15s; }
+  .btn:hover { background: var(--gris-claro); }
+  .btn-primary { background: var(--azul); color: #fff; border-color: var(--azul); }
+  .btn-primary:hover { background: #0C447C; }
+  .btn-success { background: var(--verde); color: #fff; border-color: var(--verde); font-size: 13px; padding: 6px 14px; }
+  .btn-success:hover { background: #27500A; }
+  .btn-danger  { background: var(--rojo); color: #fff; border-color: var(--rojo); font-size: 13px; padding: 6px 14px; }
+  .btn-danger:hover  { background: #791F1F; }
+
+  /* ALERTAS */
+  .alert { padding: 10px 14px; border-radius: var(--radio); font-size: 14px; margin-bottom: 1rem; }
+  .alert-error   { background: var(--rojo-claro);  color: var(--rojo);  border: 1px solid #F7C1C1; }
+  .alert-success { background: var(--verde-claro); color: var(--verde); border: 1px solid #C0DD97; }
+
+  /* TARJETAS ADMIN */
+  .reserva-card { background: var(--bg-card); border: 1px solid var(--borde); border-radius: var(--radio-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .reserva-card.pendiente { border-left: 4px solid var(--violeta); }
+  .reserva-card.aprobada  { border-left: 4px solid var(--verde); }
+  .reserva-card.rechazada { border-left: 4px solid var(--rojo); opacity: 0.75; }
+  .reserva-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .reserva-title  { font-size: 15px; font-weight: 600; }
+  .reserva-meta   { font-size: 12px; color: var(--texto-sec); margin-top: 3px; }
+  .reserva-meta span { margin-right: 10px; }
+  .badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; white-space: nowrap; }
+  .badge-pendiente { background: var(--violeta-claro); color: var(--violeta); }
+  .badge-aprobada  { background: var(--verde-claro);   color: var(--verde); }
+  .badge-rechazada { background: var(--rojo-claro);    color: var(--rojo); }
+  .reserva-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .rechazo-form { margin-top: 10px; display: none; }
+  .rechazo-form.visible { display: block; }
+  .rechazo-form .btns { display: flex; gap: 8px; margin-top: 8px; }
+  .empty-state { padding: 2.5rem; text-align: center; color: var(--texto-sec); font-size: 14px; border: 1px dashed var(--borde); border-radius: var(--radio-lg); }
+  .loading { text-align: center; padding: 2rem; color: var(--texto-sec); font-size: 14px; }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+    .horarios-grid { grid-template-columns: 1fr; }
+    header { padding: 0 1rem; }
+    .header-sub { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-icon">🖥️</div>
+    <h1>Sala de Informática</h1>
+    <p class="sub">E.E.S N°11 — Esteban Echeverría<br>Sistema de reservas de la sala</p>
+
+    <label class="login-field-label" for="login-email">Mail ABC (@abc.gob.ar)</label>
+    <input type="email" id="login-email" placeholder="usuario@abc.gob.ar" onkeydown="if(event.key==='Enter')doLogin()">
+
+    <label class="login-field-label" for="login-pass">Contraseña</label>
+    <input type="password" id="login-pass" placeholder="Ingresá tu contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+
+    <div class="login-error" id="login-error"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="doLogin()">Ingresar</button>
+    <p class="login-note">Solo para uso de docentes de la institución</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-left">
+      <div>
+        <div class="header-title">🖥️ Sala de Informática — E.E.S N°11</div>
+        <div class="header-sub" id="header-rol"></div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <div class="main">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('profesores')">Solicitar reserva</button>
+      <button class="tab-btn" id="tab-admin" style="display:none" onclick="switchTab('admin')">
+        Panel de administración
+        <span class="notif-badge" id="notif-count" style="display:none"></span>
+      </button>
+    </div>
+
+    <!-- PANEL DOCENTES -->
+    <div class="panel active" id="panel-profesores">
+      <p class="section-title">Disponibilidad de la sala — próxima semana</p>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#EAF3DE;border:1px solid #C0DD97;"></div> Disponible</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#FAEEDA;border:1px solid #FAC775;"></div> Reservada</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#EEEDFE;border:1px solid #CECBF6;"></div> Pendiente</div>
+      </div>
+      <div class="schedule-wrap">
+        <div class="schedule-grid" id="schedule-grid">
+          <div class="loading" style="grid-column:1/-1">Cargando disponibilidad...</div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <p class="section-title" style="margin-bottom:1.25rem;">Nueva solicitud de reserva</p>
+        <div id="form-alert"></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre del docente</label>
+            <input type="text" id="f-nombre" placeholder="Ej: María González">
+          </div>
+          <div class="form-group">
+            <label>Materia / Área</label>
+            <input type="text" id="f-materia" placeholder="Ej: Informática, Matemática">
+          </div>
+          <div class="form-group">
+            <label>Fecha solicitada</label>
+            <input type="date" id="f-fecha" onchange="actualizarHorarios()">
+          </div>
+          <div class="form-group">
+            <label>Curso / División</label>
+            <select id="f-curso">
+              <option value="">— Seleccionar —</option>
+              <option>1° 1</option><option>1° 6</option>
+              <option>2° 1</option><option>2° 4</option>
+              <option>3° 1</option><option>3° 4</option>
+              <option>4° 1</option><option>4° 2</option>
+              <option>5° 1</option><option>5° 2</option>
+              <option>6° 1</option><option>6° 2</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Recursos</label>
+            <select id="f-recursos">
+              <option value="">— Seleccionar —</option>
+              <option>TV / Video</option>
+              <option>Netbooks</option>
+              <option>Robótica</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Horarios solicitados <span style="font-weight:400;color:var(--texto-sec)">(podés elegir uno o más)</span></label>
+            <div class="horarios-grid" id="horarios-checkboxes"></div>
+          </div>
+          <div class="form-group full">
+            <label>Actividad</label>
+            <textarea id="f-motivo" placeholder="Describí brevemente qué van a hacer los alumnos en la sala..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Cantidad de alumnos</label>
+            <input type="number" id="f-alumnos" placeholder="Ej: 28" min="1" max="40">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="enviarSolicitud()">Enviar solicitud</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL ADMIN -->
+    <div class="panel" id="panel-admin">
+      <p class="section-title">Gestión de reservas</p>
+      <div id="admin-alert"></div>
+      <div id="lista-reservas"><div class="loading">Cargando reservas...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<!-- Firebase + lógica -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // ════════════════════════════════════════
+  // CONFIGURACIÓN — COMPLETAR CON TUS DATOS
+  // ════════════════════════════════════════
+  const FIREBASE_URL        = "https://sala-informatica-efdbd-default-rtdb.firebaseio.com";
+  const EMAILJS_PUBLIC_KEY  = "EXwDJvwmZinEgTpDe";
+  const EMAILJS_SERVICE_ID  = "service_v06ys7a";
+  const EMAILJS_TEMPLATE_ID = "template_tnqxuk1";
+  const EMAIL_ADMIN         = "informatica11ee@gmail.com";
+  const PASS_DOCENTE        = "laboratorio2026";
+  const PASS_ADMIN          = "malvinas850";
+  // ════════════════════════════════════════
+
+  const HORARIOS = ['7:30 – 8:30','8:30 – 9:30','9:45 – 10:45','10:45 – 11:45'];
+  const DIAS     = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+
+  const db = getDatabase(initializeApp({ databaseURL: FIREBASE_URL }));
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+
+  let rolActual = null, emailActual = null, reservasDB = {};
+
+  // ── HELPERS ──
+  const toDateStr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
+  function fechaMinStr() {
+    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+2);
+    while(d.getDay()===0||d.getDay()===6) d.setDate(d.getDate()+1);
+    return toDateStr(d);
+  }
+  function fechaMinLabel() {
+    const s = fechaMinStr().split('-');
+    return `${s[2]}/${s[1]}/${s[0]}`;
+  }
+
+  // ── LOGIN ──
+  window.doLogin = function() {
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const pass  = document.getElementById('login-pass').value;
+    const err   = document.getElementById('login-error');
+    if (pass === PASS_ADMIN) {
+      // Admin puede ingresar con cualquier mail (gmail u otro)
+      emailActual = email; iniciarSesion('admin');
+    } else if (pass === PASS_DOCENTE) {
+      // Docentes deben usar su cuenta @abc.gob.ar
+      if (!email.endsWith('@abc.gob.ar')) {
+        err.textContent = 'Los docentes deben ingresar con su cuenta @abc.gob.ar institucional.'; return;
+      }
+      emailActual = email; iniciarSesion('docente');
+    } else {
+      err.textContent = 'Contraseña incorrecta. Intentá de nuevo.';
+      document.getElementById('login-pass').value='';
+    }
+  };
+
+  function iniciarSesion(rol) {
+    rolActual = rol;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('header-rol').textContent = (rol==='admin' ? 'Administración — ' : '') + emailActual;
+    if (rol==='admin') document.getElementById('tab-admin').style.display = 'inline-block';
+    document.getElementById('f-fecha').min = fechaMinStr();
+    buildHorariosCheckboxes();
+    onValue(ref(db,'reservas'), snap => {
+      reservasDB = snap.val() || {};
+      buildGrid();
+      buildHorariosCheckboxes();
+      updateNotif();
+      if (rolActual==='admin' && document.getElementById('panel-admin').classList.contains('active')) renderAdmin();
+    });
+  }
+
+  window.logout = function() {
+    rolActual = null; emailActual = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    ['login-pass','login-email'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('tab-admin').style.display = 'none';
+    switchTab('profesores');
+  };
+
+  // ── GRILLA ──
+  window.buildGrid = function() {
+    const grid = document.getElementById('schedule-grid');
+    const hoy = new Date(); hoy.setHours(12,0,0,0);
+    const days = []; let d = new Date(hoy);
+    while(days.length<5) { d.setDate(d.getDate()+1); if(d.getDay()>=1&&d.getDay()<=5) days.push(new Date(d)); }
+
+    let html = '<div class="sch-header"></div>';
+    days.forEach(d => {
+      html += `<div class="sch-header">${DIAS[d.getDay()-1]}<br><span style="font-weight:400;font-size:11px;">${d.getDate()}/${d.getMonth()+1}</span></div>`;
+    });
+    HORARIOS.forEach(h => {
+      html += `<div class="sch-time">${h}</div>`;
+      days.forEach(d => {
+        const ds = toDateStr(d);
+        const r  = Object.values(reservasDB).find(x => x.fecha===ds && x.horarios && x.horarios.includes(h) && x.estado!=='rechazada');
+        let cls = 'slot-available', txt = 'Libre';
+        if (r) {
+          if (r.estado==='pendiente')       { cls='slot-pending';  txt='Pendiente'; }
+          else if (r.estado==='aprobada')   { cls='slot-reserved'; txt=`${r.curso}<br><span style="font-weight:400;font-size:10px">${r.materia}</span>`; }
+        }
+        html += `<div class="sch-slot ${cls}">${txt}</div>`;
+      });
+    });
+    grid.innerHTML = html;
+  };
+
+  // ── CHECKBOXES HORARIOS ──
+  window.buildHorariosCheckboxes = function() {
+    const fecha = document.getElementById('f-fecha') ? document.getElementById('f-fecha').value : '';
+    const cont  = document.getElementById('horarios-checkboxes');
+    if (!cont) return;
+    const prevSeleccionados = Array.from(cont.querySelectorAll('input:checked')).map(cb=>cb.value);
+    cont.innerHTML = HORARIOS.map(h => {
+      const ocupado  = fecha ? Object.values(reservasDB).some(r => r.fecha===fecha && r.horarios && r.horarios.includes(h) && r.estado!=='rechazada') : false;
+      const checked  = prevSeleccionados.includes(h) && !ocupado;
+      return `<label class="horario-check${ocupado?' ocupado':''}${checked?' selected':''}" onclick="toggleHorario(this)">
+        <input type="checkbox" value="${h}" ${checked?'checked':''} ${ocupado?'disabled':''}>
+        <span class="horario-label">${h}${ocupado?' — ocupado':''}</span>
+      </label>`;
+    }).join('');
+  };
+  window.actualizarHorarios = window.buildHorariosCheckboxes;
+
+  window.toggleHorario = function(label) {
+    if (label.classList.contains('ocupado')) return;
+    const cb = label.querySelector('input[type=checkbox]');
+    cb.checked = !cb.checked;
+    label.classList.toggle('selected', cb.checked);
+  };
+
+  // ── ENVIAR SOLICITUD ──
+  window.enviarSolicitud = function() {
+    const v = id => document.getElementById(id).value.trim();
+    const nombre=v('f-nombre'), materia=v('f-materia'), fecha=v('f-fecha'),
+          curso=document.getElementById('f-curso').value,
+          recursos=document.getElementById('f-recursos').value,
+          motivo=v('f-motivo'), alumnos=v('f-alumnos');
+
+    const horariosSeleccionados = Array.from(
+      document.querySelectorAll('#horarios-checkboxes input[type=checkbox]:checked')
+    ).map(cb=>cb.value);
+
+    if (!nombre||!materia||!fecha||!curso||!recursos||!motivo||!alumnos) {
+      setAlert('form-alert','Por favor completá todos los campos.','error'); return;
+    }
+    if (horariosSeleccionados.length===0) {
+      setAlert('form-alert','Seleccioná al menos un horario.','error'); return;
+    }
+    const hoy=new Date(); hoy.setHours(0,0,0,0);
+    if (Math.floor((new Date(fecha+'T12:00:00')-hoy)/86400000)<2) {
+      setAlert('form-alert',`Reservas con al menos 2 días de anticipación. Fecha mínima: ${fechaMinLabel()}.`,'error'); return;
+    }
+    for (const h of horariosSeleccionados) {
+      const dup = Object.values(reservasDB).find(r=>r.fecha===fecha&&r.horarios&&r.horarios.includes(h)&&r.estado!=='rechazada');
+      if (dup) { setAlert('form-alert',`El horario ${h} ya está ocupado (${dup.estado}). Deseleccionalo.`,'error'); return; }
+    }
+
+    const nueva = {
+      nombre, materia, curso, recursos, fecha,
+      horarios: horariosSeleccionados,
+      horariosStr: horariosSeleccionados.join(' / '),
+      motivo, alumnos: parseInt(alumnos),
+      emailDocente: emailActual,
+      estado: 'pendiente',
+      solicitadoEn: new Date().toISOString()
+    };
+
+    push(ref(db,'reservas'), nueva)
+      .then(()=>{
+        setAlert('form-alert','Solicitud enviada. Recibirás la confirmación en tu mail ABC.','success');
+        enviarEmail(EMAIL_ADMIN, 'Administradora', nueva, null, null);
+        ['f-nombre','f-materia','f-motivo','f-alumnos'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('f-fecha').value='';
+        ['f-curso','f-recursos'].forEach(id=>document.getElementById(id).selectedIndex=0);
+        buildHorariosCheckboxes();
+      })
+      .catch(()=>setAlert('form-alert','Error al guardar. Verificá tu conexión.','error'));
+  };
+
+  // ── EMAILJS ──
+  function enviarEmail(toEmail, toName, reserva, estado, motivoRechazo) {
+    let mensaje;
+    if (!estado) {
+      mensaje = `Nueva solicitud de reserva de ${reserva.nombre} para el ${reserva.fecha.split('-').reverse().join('/')} — ${reserva.horariosStr}. Ingresá al sistema para aprobar o rechazar.`;
+    } else if (estado==='aprobada') {
+      mensaje = `¡Tu reserva fue APROBADA! La sala queda reservada para el ${reserva.fecha.split('-').reverse().join('/')} en el horario ${reserva.horariosStr}.`;
+    } else {
+      mensaje = `Tu reserva fue RECHAZADA.${motivoRechazo?' Motivo: '+motivoRechazo:' Podés contactar a la encargada de la sala para más información.'}`;
+    }
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: toEmail, to_name: toName,
+      subject: estado
+        ? `Reserva sala informática — ${estado==='aprobada'?'APROBADA ✓':'RECHAZADA ✗'}`
+        : `Nueva solicitud — ${reserva.nombre}`,
+      docente:   reserva.nombre,
+      email_doc: reserva.emailDocente,
+      materia:   reserva.materia,
+      curso:     reserva.curso,
+      fecha:     reserva.fecha.split('-').reverse().join('/'),
+      horarios:  reserva.horariosStr,
+      recursos:  reserva.recursos,
+      alumnos:   reserva.alumnos,
+      actividad: reserva.motivo,
+      mensaje
+    }).catch(e=>console.warn('EmailJS:',e));
+  }
+
+  // ── NOTIF / ADMIN ──
+  window.updateNotif = function() {
+    const n=Object.values(reservasDB).filter(r=>r.estado==='pendiente').length;
+    const nb=document.getElementById('notif-count');
+    nb.textContent=n; nb.style.display=n>0?'inline':'none';
+  };
+
+  window.renderAdmin = function() {
+    const todas=Object.entries(reservasDB).map(([k,v])=>({...v,_key:k}));
+    const pend=todas.filter(r=>r.estado==='pendiente').sort((a,b)=>a.solicitadoEn.localeCompare(b.solicitadoEn));
+    const hist=todas.filter(r=>r.estado!=='pendiente').sort((a,b)=>b.solicitadoEn.localeCompare(a.solicitadoEn));
+    let html='';
+    if(pend.length) { html+=`<p style="font-size:13px;color:var(--texto-sec);margin-bottom:8px;">Pendientes (${pend.length})</p>`; pend.forEach(r=>html+=cardHTML(r)); }
+    if(hist.length) { html+=`<p style="font-size:13px;color:var(--texto-sec);margin:1.25rem 0 8px;">Historial</p>`; hist.forEach(r=>html+=cardHTML(r)); }
+    document.getElementById('lista-reservas').innerHTML = html||'<div class="empty-state">No hay reservas aún.</div>';
+  };
+
+  function cardHTML(r) {
+    const f=r.fecha?r.fecha.split('-').reverse().join('/'):'—';
+    const h=r.horariosStr||(r.horarios?r.horarios.join(' / '):'—');
+    const bc={pendiente:'badge-pendiente',aprobada:'badge-aprobada',rechazada:'badge-rechazada'}[r.estado];
+    const bl={pendiente:'Pendiente',aprobada:'Aprobada',rechazada:'Rechazada'}[r.estado];
+    const k=r._key;
+    let acc = '';
+    if (r.estado==='pendiente') {
+      acc = `
+      <div class="reserva-actions">
+        <button class="btn btn-success" onclick="aprobar('${k}')">Aprobar</button>
+        <button class="btn btn-danger"  onclick="mostrarRechazo('${k}')">Rechazar</button>
+      </div>
+      <div class="rechazo-form" id="rechazo-${k}">
+        <textarea id="motivo-rechazo-${k}" style="font-size:13px;" placeholder="Motivo del rechazo (el docente lo recibirá por mail)..."></textarea>
+        <div class="btns">
+          <button class="btn btn-danger" onclick="rechazar('${k}')">Confirmar rechazo</button>
+          <button class="btn"            onclick="ocultarRechazo('${k}')">Cancelar</button>
+        </div>
+      </div>`;
+    } else if (r.estado==='aprobada') {
+      acc = `
+      <div class="reserva-actions">
+        <button class="btn btn-danger" style="font-size:13px;padding:6px 14px;" onclick="mostrarCancelacion('${k}')">Cancelar reserva aprobada</button>
+      </div>
+      <div class="rechazo-form" id="rechazo-${k}">
+        <textarea id="motivo-rechazo-${k}" style="font-size:13px;" placeholder="Motivo de la cancelación (el docente lo recibirá por mail)..."></textarea>
+        <div class="btns">
+          <button class="btn btn-danger" onclick="cancelarAprobada('${k}')">Confirmar cancelación</button>
+          <button class="btn"            onclick="ocultarRechazo('${k}')">Volver</button>
+        </div>
+      </div>`;
+    } else {
+      acc = r.motivoRechazo ? `<p style="font-size:12px;color:var(--texto-sec);margin-top:6px;">Motivo: ${r.motivoRechazo}</p>` : '';
+    }
+      <div class="reserva-header">
+        <div>
+          <p class="reserva-title">${r.nombre} — ${r.materia}</p>
+          <div class="reserva-meta"><span>📅 ${f}</span><span>🕐 ${h}</span><span>👥 ${r.alumnos} alumnos</span></div>
+          <div class="reserva-meta"><span>📚 ${r.curso}</span><span>🖥️ ${r.recursos}</span><span>✉️ ${r.emailDocente||'—'}</span></div>
+          <p style="font-size:13px;margin-top:5px;">${r.motivo}</p>
+        </div>
+        <span class="badge ${bc}">${bl}</span>
+      </div>${acc}
+    </div>`;
+  }
+
+  window.aprobar = function(k) {
+    const r={...reservasDB[k],_key:k};
+    update(ref(db,`reservas/${k}`),{estado:'aprobada'}).then(()=>{
+      setAlert('admin-alert','Reserva aprobada. El docente fue notificado por mail.','success');
+      enviarEmail(r.emailDocente, r.nombre, r, 'aprobada', null);
+      setTimeout(()=>setAlert('admin-alert','',''),3500);
+    });
+  };
+
+  window.rechazar = function(k) {
+    const r={...reservasDB[k],_key:k};
+    const motivo=document.getElementById(`motivo-rechazo-${k}`).value.trim()||null;
+    update(ref(db,`reservas/${k}`),{estado:'rechazada',motivoRechazo:motivo}).then(()=>{
+      setAlert('admin-alert','Reserva rechazada. El docente fue notificado por mail.','error');
+      enviarEmail(r.emailDocente, r.nombre, r, 'rechazada', motivo);
+      setTimeout(()=>setAlert('admin-alert','',''),3500);
+    });
+  };
+
+  window.mostrarRechazo   = k => document.getElementById(`rechazo-${k}`).classList.add('visible');
+  window.mostrarCancelacion = k => document.getElementById(`rechazo-${k}`).classList.add('visible');
+
+  window.cancelarAprobada = function(k) {
+    const r = {...reservasDB[k], _key: k};
+    const motivo = document.getElementById(`motivo-rechazo-${k}`).value.trim() || null;
+    update(ref(db, `reservas/${k}`), {estado: 'rechazada', motivoRechazo: motivo}).then(() => {
+      setAlert('admin-alert', 'Reserva cancelada. El docente fue notificado por mail.', 'error');
+      const mensajeCancelacion = `Tu reserva aprobada para el ${r.fecha.split('-').reverse().join('/')} (${r.horariosStr}) fue CANCELADA por la administración.${motivo ? ' Motivo: ' + motivo : ' Podés contactar a la encargada de la sala para más información.'}`;
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email: r.emailDocente, to_name: r.nombre,
+        subject: 'Reserva sala informática — CANCELADA',
+        docente: r.nombre, email_doc: r.emailDocente,
+        materia: r.materia, curso: r.curso,
+        fecha: r.fecha.split('-').reverse().join('/'),
+        horarios: r.horariosStr, recursos: r.recursos,
+        alumnos: r.alumnos, actividad: r.motivo,
+        mensaje: mensajeCancelacion
+      }).catch(e => console.warn('EmailJS:', e));
+      setTimeout(() => setAlert('admin-alert', '', ''), 3500);
+    }).catch(() => setAlert('admin-alert', 'Error al cancelar. Intentá de nuevo.', 'error'));
+  };
+  window.ocultarRechazo  = k => document.getElementById(`rechazo-${k}`).classList.remove('visible');
+
+  window.switchTab = function(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+tab).classList.add('active');
+    document.querySelectorAll('.tab-btn')[tab==='profesores'?0:1].classList.add('active');
+    if(tab==='admin') renderAdmin();
+  };
+
+  window.setAlert = function(id, msg, type) {
+    document.getElementById(id).innerHTML = msg?`<div class="alert alert-${type}">${msg}</div>`:'';
+  };
+</script>
+</body>
+</html>
