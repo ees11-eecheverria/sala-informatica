@@ -106,7 +106,10 @@ textarea{resize:vertical;min-height:76px}
     <span class="lbl">Mail ABC (@abc.gob.ar)</span>
     <input type="email" id="login-email" placeholder="usuario@abc.gob.ar">
     <span class="lbl">Contrasena</span>
-    <input type="password" id="login-pass" placeholder="Ingresa tu contrasena">
+    <div style="position:relative">
+      <input type="password" id="login-pass" placeholder="Ingresa tu contrasena" style="padding-right:44px">
+      <button type="button" id="btn-verpass" onclick="togglePass()" style="position:absolute;right:0;top:0;height:100%;width:42px;background:none;border:none;cursor:pointer;color:var(--texto-sec);font-size:18px;" title="Mostrar/ocultar">&#128065;</button>
+    </div>
     <div class="lerr" id="login-error"></div>
     <button class="btn btnp" style="width:100%;margin-top:12px;padding:14px;font-size:16px;min-height:50px;touch-action:manipulation;" id="btn-ingresar">Ingresar</button>
     <p class="lnote">Solo para uso de docentes de la institucion</p>
@@ -224,6 +227,12 @@ function slotOcupado(fecha,h){
 }
 
 // LOGIN
+function togglePass(){
+  var inp = document.getElementById('login-pass');
+  var btn = document.getElementById('btn-verpass');
+  if(inp.type==='password'){ inp.type='text'; btn.innerHTML='&#128064;'; }
+  else { inp.type='password'; btn.innerHTML='&#128065;'; }
+}
 document.getElementById('btn-ingresar').addEventListener('click', hacerLogin);
 document.getElementById('btn-ingresar').addEventListener('touchend', function(e){ e.preventDefault(); hacerLogin(); });
 document.getElementById('login-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') hacerLogin(); });
